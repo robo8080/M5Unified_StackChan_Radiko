@@ -22,7 +22,7 @@ An M5Stack library for rendering avatar faces <https://github.com/meganetaaan/m5
 ---
 ### このプログラムを動かすのに必要な物 ###
 * [M5Stack Core2](http://www.m5stack.com/ "Title") (M5Stack Core2 for AWSで動作確認をしました。)<br>
-[ｽﾀｯｸﾁｬﾝ M5GoBottom版組み立てキット](https://raspberrypi.mongonta.com/about-products-stackchan-m5gobottom-version/ "Title")
+* [ｽﾀｯｸﾁｬﾝ M5GoBottom版組み立てキット](https://raspberrypi.mongonta.com/about-products-stackchan-m5gobottom-version/ "Title")
 * VSCode
 * PlatformIO<br>
 
@@ -40,13 +40,13 @@ An M5Stack library for rendering avatar faces <https://github.com/meganetaaan/m5
 
 ---
 ### WiFiの設定 ###
-* "M5StickC_WebRadio_Radiko_Avatar.ino"の1行目付近、SSIDとPASSWORDを設定してください。
+* "M5Unified_StackChan_Radiko.ino"の1行目付近、SSIDとPASSWORDを設定してください。
 * SSIDとPASSWORDを設定せずにSmartConfigを使用することもできます。
 その場合はiOSかAndroidの「Espressif Esptouch」アプリから設定します。
 
 ---
 ### 使い方 ###
-* Wi-Fiの設定はSmartConfigを使用し、iOSかAndroidの「Espressif Esptouch」アプリから設定します。<br>
+* SSIDとPASSWORDを設定していない場合Wi-Fiの設定はSmartConfigを使用し、iOSかAndroidの「Espressif Esptouch」アプリから設定します。<br>
 * ボタンA：選曲 ボタンB：音量ー ボタンC：音量＋<br>
 * レベルメーター表示部にタッチすると、レベルメーター表示をON/OFFできます。<br>
 * 画面中央にタッチすると首振りを止めます。<br><br>
