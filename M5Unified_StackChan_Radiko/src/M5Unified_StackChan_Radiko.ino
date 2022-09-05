@@ -771,7 +771,7 @@ void setup(void)
   M5.Display.clear();
 
   gfxSetup(&M5.Display);
-//  M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), TFT_WHITE); Ataru
+//  M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), TFT_WHITE); //Ataru
   M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), 0xef55); //
 
   Servo_setup();
@@ -814,6 +814,7 @@ void loop(void)
   static unsigned long long saveSettings = 0;
   radio.handle();
   if(levelMeter) gfxLoop(&M5.Display);
+//  if(!levelMeter) avatar->setSpeechText(meta_text[0]);
   avatar->draw();
 
   {
@@ -851,7 +852,9 @@ void loop(void)
           M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), 0xef55); //
           avatar->setScale(0.80);
           avatar->setOffset(0, 52);
+//          avatar->setSpeechText("");
        } else {
+//          M5.Display.fillScreen(TFT_WHITE); //Ataru
           M5.Display.fillScreen(0xef55);
           avatar->setScale(1.0);
           avatar->setOffset(0, 0);

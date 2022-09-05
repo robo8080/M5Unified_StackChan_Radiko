@@ -33,16 +33,11 @@ class Balloon final : public Drawable {
     if (strlen(text) == 0) {
       return;
     }
-//    lcd.setTextSize(TEXT_SIZE);
-//    lcd.setTextDatum(MC_DATUM);
     spi->setTextSize(TEXT_SIZE);
     spi->setTextColor((uint16_t)primaryColor, backgroundColor);
     spi->setTextDatum(MC_DATUM);
-    M5.Lcd.setTextSize(TEXT_SIZE);
-    M5.Lcd.setFont(&fonts::efontJA_16);
-    M5.Lcd.setTextDatum(MC_DATUM);
-//    int textWidth = lcd.textWidth((const char*)text, 2);
-    int textWidth = M5.Lcd.textWidth(text);
+    spi->setFont(&fonts::efontJA_16);
+    int textWidth = spi->textWidth(text);
     int textHeight = TEXT_HEIGHT * TEXT_SIZE;
     spi->fillEllipse(cx, cy, _max(textWidth, MIN_WIDTH) + 2 + 12, textHeight * 2 + 2,
                      (uint16_t)primaryColor);
