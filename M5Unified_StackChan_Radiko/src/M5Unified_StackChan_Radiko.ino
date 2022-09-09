@@ -456,6 +456,8 @@ ServoEasing servo_x;
 ServoEasing servo_y;
 bool servo_home = false;
 #endif
+bool levelMeter = true;
+bool balloon = false;
 
 void behavior(void *args)
 {
@@ -474,7 +476,11 @@ void behavior(void *args)
     float open = (float)level/15000.0;
     avatar->setMouthOpenRatio(open);
     avatar->getGaze(&gazeY, &gazeX);
-    avatar->setRotation(gazeX * 5);
+    if(!balloon){
+      avatar->setRotation(gazeX * 5);
+    } else {
+      avatar->setRotation(0.0);
+    }
 #ifdef USE_SERVO
     if(!servo_home)
     {
@@ -642,6 +648,7 @@ struct box_t
 
 static box_t box_level;
 static box_t box_servo;
+static box_t box_balloon;
 
 void setup(void)
 {
@@ -806,9 +813,9 @@ void setup(void)
   Avatar_setup();
   box_level.setupBox(0, 0, 320, 60);
   box_servo.setupBox(80, 120, 80, 80);
+  box_balloon.setupBox(0, 160, M5.Display.width(), 80);
 }
 
-bool levelMeter = true;
 void loop(void)
 {
   static unsigned long long saveSettings = 0;
@@ -816,6 +823,7 @@ void loop(void)
   if(levelMeter) gfxLoop(&M5.Display);
 //  if(!levelMeter) avatar->setSpeechText(meta_text[0]);
   avatar->draw();
+  if(!levelMeter && balloon)   avatar->setSpeechText(meta_text[0]);
 
   {
     static int prev_frame;
@@ -852,10 +860,14 @@ void loop(void)
           M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), 0xef55); //
           avatar->setScale(0.80);
           avatar->setOffset(0, 52);
+          if(balloon) {
+            avatar->setSpeechText("");
+            balloon = false;
+          }
 //          avatar->setSpeechText("");
        } else {
 //          M5.Display.fillScreen(TFT_WHITE); //Ataru
-          M5.Display.fillScreen(0xef55);
+          M5.Display.fillScreen(0xef55); //Dann
           avatar->setScale(1.0);
           avatar->setOffset(0, 0);
         }
@@ -868,6 +880,12 @@ void loop(void)
         M5.Speaker.tone(1000, 100);
       }
 #endif
+      if (box_balloon.contain(t.x, t.y) && !levelMeter)
+      {
+        balloon = !balloon;
+        if(!balloon) avatar->setSpeechText("");
+        M5.Speaker.tone(1000, 100);
+      }
     }
   }
   if (M5.BtnA.wasPressed())
