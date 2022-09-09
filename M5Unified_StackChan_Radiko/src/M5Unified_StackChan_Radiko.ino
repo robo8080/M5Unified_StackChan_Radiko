@@ -130,7 +130,7 @@ public:
 
 static constexpr size_t WAVE_SIZE = 320;
 static AudioOutputM5Speaker out(&M5.Speaker, m5spk_virtual_channel);
-static Radiko radio(&out, 1-m5spk_task_pinned_core);
+static Radiko radio(&out, m5spk_task_pinned_core);
 
 static fft_t fft;
 static bool fft_enabled = false;
@@ -676,6 +676,7 @@ void setup(void)
     /// Increasing the sample_rate will improve the sound quality instead of increasing the CPU load.
     spk_cfg.sample_rate = 144000; // default:64000 (64kHz)  e.g. 48000 , 50000 , 80000 , 96000 , 100000 , 128000 , 144000 , 192000 , 200000
     spk_cfg.task_pinned_core = m5spk_task_pinned_core;
+    spk_cfg.task_priority = 5;
     M5.Speaker.config(spk_cfg);
   }
 
