@@ -25,9 +25,10 @@
 #include <AudioOutputM5Speaker.h>
 
 #include "Avatar.h"
-//#include "AtaruFace.h"
-//#include "RamFace.h"
+#include "AtaruFace.h"
+#include "RamFace.h"
 #include "DannFace.h"
+#include "DogFace.h"
 #include "PaletteColor.h"
 
 int BatteryLevel = -1;
@@ -588,18 +589,53 @@ void Wifi_setup() {
   Serial.println(WiFi.localIP());
 }
 
+Face* faces[6];
+const int facesSize = sizeof(faces) / sizeof(Face*);
+//int faceIdx = 1;
+int16_t faceIdx = 1;
+ColorPalette* cps[6];
+const int cpsSize = sizeof(cps) / sizeof(ColorPalette*);
+int cpsIdx = 0;
+const uint16_t color_table[facesSize] = {
+  TFT_BLACK,  //Default
+  TFT_WHITE,  //AtaruFace
+  TFT_WHITE,  //RamFace
+  0xef55,     //DannFace
+  TFT_WHITE,  //DogFace
+  0xef55,     //DannFace
+};
+
 void Avatar_setup() {
-//    avatar = new Avatar(new AtaruFace());
-//  avatar = new Avatar(new RamFace());
-  avatar = new Avatar(new DannFace());
-  ColorPalette cp;
-//  cp.set(COLOR_PRIMARY, PC_BLACK);  //AtaruFace
-//  cp.set(COLOR_BACKGROUND, PC_WHITE);
-//  cp.set(COLOR_SECONDARY, PC_WHITE);
-  cp.set(COLOR_PRIMARY, PC_BLACK); //DannFace
-  cp.set(COLOR_BACKGROUND, 9);
-  cp.set(COLOR_SECONDARY, PC_WHITE);
-  avatar->setColorPalette(cp);
+  avatar = new Avatar();
+  faces[0] = avatar->getFace();
+  faces[1] = new AtaruFace();
+  faces[2] = new RamFace();
+  faces[3] = new DannFace();
+  faces[4] = new DogFace();
+  faces[5] = avatar->getFace();
+
+  cps[0] = new ColorPalette();
+  cps[1] = new ColorPalette();
+  cps[2] = new ColorPalette();
+  cps[3] = new ColorPalette();
+  cps[4] = new ColorPalette();
+  cps[5] = new ColorPalette();
+  cps[1]->set(COLOR_PRIMARY, PC_BLACK);  //AtaruFace
+  cps[1]->set(COLOR_SECONDARY, PC_WHITE);
+  cps[1]->set(COLOR_BACKGROUND, PC_WHITE);
+  cps[2]->set(COLOR_PRIMARY, PC_BLACK);  //RamFace
+  cps[2]->set(COLOR_SECONDARY, PC_WHITE);
+  cps[2]->set(COLOR_BACKGROUND, PC_WHITE);
+  cps[3]->set(COLOR_PRIMARY, PC_BLACK); //DannFace
+  cps[3]->set(COLOR_BACKGROUND, 9);
+  cps[3]->set(COLOR_SECONDARY, PC_WHITE);
+  cps[4]->set(COLOR_PRIMARY, PC_BLACK);  //DogFace
+  cps[4]->set(COLOR_SECONDARY, PC_WHITE);
+  cps[4]->set(COLOR_BACKGROUND, PC_WHITE);
+  cps[5] = cps[3];
+
+  avatar->setFace(faces[faceIdx]);
+  avatar->setColorPalette(*cps[faceIdx]);
   switch (M5.getBoard())
   {
     case m5::board_t::board_M5StickCPlus:
@@ -623,6 +659,10 @@ void Avatar_setup() {
   }
   avatar->init(); // start drawing
   avatar->addTask(behavior, "behavior");
+}
+void select_face(int idx){
+  avatar->setFace(faces[1]);
+  avatar->setColorPalette(*cps[1]);
 }
 
 struct box_t
@@ -649,6 +689,7 @@ struct box_t
 static box_t box_level;
 static box_t box_servo;
 static box_t box_balloon;
+static box_t box_face;
 
 void setup(void)
 {
@@ -744,7 +785,16 @@ void setup(void)
     }
     SD.end();
   }
-
+  {
+    uint32_t nvs_handle;
+    if (ESP_OK == nvs_open("Avatar", NVS_READONLY, &nvs_handle)) {
+      nvs_get_i16(nvs_handle, "faceIdx", &faceIdx);
+      if(faceIdx < 0 || faceIdx >= facesSize) {
+        faceIdx = 0;
+      }
+      nvs_close(nvs_handle);
+    }
+  }
   {
     uint32_t nvs_handle;
     if (ESP_OK == nvs_open("WebRadio", NVS_READONLY, &nvs_handle)) {
@@ -779,8 +829,7 @@ void setup(void)
   M5.Display.clear();
 
   gfxSetup(&M5.Display);
-//  M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), TFT_WHITE); //Ataru
-  M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), 0xef55); //
+  M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), color_table[faceIdx]); //
 
   Servo_setup();
 
@@ -815,6 +864,7 @@ void setup(void)
   box_level.setupBox(0, 0, 320, 60);
   box_servo.setupBox(80, 120, 80, 80);
   box_balloon.setupBox(0, 160, M5.Display.width(), 80);
+  box_face.setupBox(280, 100, 40, 60);
 }
 
 void loop(void)
@@ -822,7 +872,6 @@ void loop(void)
   static unsigned long long saveSettings = 0;
   radio.handle();
   if(levelMeter) gfxLoop(&M5.Display);
-//  if(!levelMeter) avatar->setSpeechText(meta_text[0]);
   avatar->draw();
   if(!levelMeter && balloon)   avatar->setSpeechText(meta_text[0]);
 
@@ -857,18 +906,15 @@ void loop(void)
         {
           M5.Display.clear();
           gfxSetup(&M5.Display);
-//        M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), TFT_WHITE); //Ataru
-          M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), 0xef55); //
+          M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), color_table[faceIdx]); //
           avatar->setScale(0.80);
           avatar->setOffset(0, 52);
           if(balloon) {
             avatar->setSpeechText("");
             balloon = false;
           }
-//          avatar->setSpeechText("");
        } else {
-//          M5.Display.fillScreen(TFT_WHITE); //Ataru
-          M5.Display.fillScreen(0xef55); //Dann
+          M5.Display.fillScreen(color_table[faceIdx]); //
           avatar->setScale(1.0);
           avatar->setOffset(0, 0);
         }
@@ -885,6 +931,26 @@ void loop(void)
       {
         balloon = !balloon;
         if(!balloon) avatar->setSpeechText("");
+        M5.Speaker.tone(1000, 100);
+      }
+      if (box_face.contain(t.x, t.y))
+      {
+        faceIdx = (faceIdx + 1) % facesSize;
+        if(levelMeter)
+        {
+          M5.Display.fillRect(0, M5.Display.height()/4+1, M5.Display.width(), M5.Display.height(), color_table[faceIdx]); //Dann
+        } else {
+          M5.Display.fillScreen(color_table[faceIdx]); //Dann
+        }
+        avatar->setFace(faces[faceIdx]);
+        avatar->setColorPalette(*cps[faceIdx]);
+        {
+          uint32_t nvs_handle;
+          if (ESP_OK == nvs_open("Avatar", NVS_READWRITE, &nvs_handle)) {
+            nvs_set_i16(nvs_handle, "faceIdx", faceIdx);
+            nvs_close(nvs_handle);
+          }
+        }
         M5.Speaker.tone(1000, 100);
       }
     }

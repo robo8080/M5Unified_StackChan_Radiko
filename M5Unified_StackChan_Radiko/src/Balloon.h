@@ -47,8 +47,9 @@ class Balloon final : public Drawable {
                      backgroundColor);
     spi->fillTriangle(cx - 60, cy - 40, cx - 10, cy - 10, cx - 40, cy - 10,
                       (uint16_t)backgroundColor);
-    spi->drawString(text, cx - 30, cy, &fonts::efontJA_16);//,
+//    spi->drawString(text, cx - 30, cy, &fonts::efontJA_16);//,
                     //2);  // Continue printing from new x position
+    spi->drawString(text, cx - textWidth / 6 - 15, cy, &fonts::efontJA_16);  // Continue printing from new x position
 #endif
   }
 };
