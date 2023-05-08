@@ -513,7 +513,7 @@ void Servo_setup() {
   }
   servo_x.setEasingType(EASE_QUADRATIC_IN_OUT);
   servo_y.setEasingType(EASE_QUADRATIC_IN_OUT);
-  setSpeedForAllServos(60);
+  setSpeedForAllServos(30);
 #endif
 }
 
