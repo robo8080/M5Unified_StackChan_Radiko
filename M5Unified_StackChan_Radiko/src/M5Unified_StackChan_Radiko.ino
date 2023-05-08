@@ -800,6 +800,7 @@ void setup(void)
     if (ESP_OK == nvs_open("WebRadio", NVS_READONLY, &nvs_handle)) {
       size_t volume;
       nvs_get_u32(nvs_handle, "volume", &volume);
+      M5.Speaker.setVolume(volume);
       M5.Speaker.setChannelVolume(m5spk_virtual_channel, volume);
 
       size_t length1;
@@ -986,6 +987,7 @@ void loop(void)
     v += add;
     if (v <= 255)
     {
+      M5.Speaker.setVolume(v);
       M5.Speaker.setChannelVolume(m5spk_virtual_channel, v);
       saveSettings = millis() + 5000;
     }
